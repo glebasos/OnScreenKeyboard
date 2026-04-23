@@ -64,14 +64,15 @@
     <Grid RowDefinitions="Auto,*">
         <Border Grid.Row="0" Background="#2A2A2A" Height="28" Name="DragBar">
             <DockPanel LastChildFill="True">
-                <Button DockPanel.Dock="Right" Content="✕" Width="28" Height="28"
+                <Button DockPanel.Dock="Right" Content="✕" Width="46" Height="28"
                         Padding="0" Background="Transparent" Foreground="White"
                         Name="CloseBtn"/>
-                <ToggleButton DockPanel.Dock="Right" Content="123"
-                              IsChecked="{Binding IsNumberRowVisible}"
-                              Width="40" Height="24" Padding="0"
-                              Margin="0,2,4,2"
-                              Background="#3A3A3A" Foreground="White"/>
+                <Button DockPanel.Dock="Right" Content="☐" Width="46" Height="28"
+                        Padding="0" Background="Transparent" Foreground="White"
+                        Name="MaxBtn"/>
+                <Button DockPanel.Dock="Right" Content="—" Width="46" Height="28"
+                        Padding="0" Background="Transparent" Foreground="White"
+                        Name="MinBtn"/>
                 <TextBlock Text="Armenian Keyboard" Foreground="#CCC"
                            VerticalAlignment="Center" Margin="8,0,0,0"/>
             </DockPanel>
@@ -178,8 +179,12 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <!-- Bottom row: shift, space, backspace, shift -->
+            <!-- Bottom row: 123, shift, space, backspace, shift -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <ToggleButton Classes="tgl" IsChecked="{Binding IsNumberRowVisible}">
+                    <TextBlock Text="123" FontSize="14"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </ToggleButton>
                 <ToggleButton Classes="tgl" IsChecked="{Binding IsShiftLocked}">
                     <TextBlock Text="⇧" FontSize="20"
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>

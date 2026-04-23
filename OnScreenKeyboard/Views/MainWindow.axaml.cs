@@ -20,6 +20,9 @@ public partial class MainWindow : Window
                 BeginMoveDrag(e);
         };
 
+        this.FindControl<Button>("MinBtn")!.Click += (_, _) => WindowState = WindowState.Minimized;
+        this.FindControl<Button>("MaxBtn")!.Click += (_, _) =>
+            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
         this.FindControl<Button>("CloseBtn")!.Click += (_, _) => Close();
     }
 
