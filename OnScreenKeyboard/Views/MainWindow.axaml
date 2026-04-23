@@ -1,0 +1,203 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:OnScreenKeyboard.ViewModels"
+        xmlns:m="using:OnScreenKeyboard.Models"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="660" d:DesignHeight="420"
+        x:Class="OnScreenKeyboard.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        x:CompileBindings="False"
+        Title="Armenian Keyboard"
+        Width="800"
+        SizeToContent="Height"
+        Topmost="True"
+        ShowActivated="False"
+        ShowInTaskbar="False"
+        CanResize="False"
+        WindowDecorations="BorderOnly"
+        Background="#1E1E1E">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="Button.key">
+            <Setter Property="Width" Value="56"/>
+            <Setter Property="Height" Value="56"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#3A3A3A"/>
+        </Style>
+        <Style Selector="Button.key:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#4A4A4A"/>
+        </Style>
+        <Style Selector="ToggleButton.tgl">
+            <Setter Property="Width" Value="56"/>
+            <Setter Property="Height" Value="56"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#3A3A3A"/>
+        </Style>
+        <Style Selector="ToggleButton.tgl:checked /template/ ContentPresenter">
+            <Setter Property="Background" Value="#5E7CE2"/>
+        </Style>
+        <Style Selector="TextBlock.arm">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="TextBlock.hint">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Foreground" Value="#99AABB"/>
+        </Style>
+        <Style Selector="TextBlock.qwerty">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Foreground" Value="#C8A464"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Background="#2A2A2A" Height="28" Name="DragBar">
+            <DockPanel LastChildFill="True">
+                <Button DockPanel.Dock="Right" Content="✕" Width="28" Height="28"
+                        Padding="0" Background="Transparent" Foreground="White"
+                        Name="CloseBtn"/>
+                <ToggleButton DockPanel.Dock="Right" Content="123"
+                              IsChecked="{Binding IsNumberRowVisible}"
+                              Width="40" Height="24" Padding="0"
+                              Margin="0,2,4,2"
+                              Background="#3A3A3A" Foreground="White"/>
+                <TextBlock Text="Armenian Keyboard" Foreground="#CCC"
+                           VerticalAlignment="Center" Margin="8,0,0,0"/>
+            </DockPanel>
+        </Border>
+
+        <StackPanel Grid.Row="1" Orientation="Vertical"
+                    HorizontalAlignment="Center"
+                    Margin="0,4,0,4"
+                    Spacing="0">
+
+            <!-- Number row (toggleable) -->
+            <ItemsControl ItemsSource="{Binding NumberRow}"
+                          IsVisible="{Binding IsNumberRowVisible}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="m:KeyModel">
+                        <Button Classes="key"
+                                Command="{Binding $parent[Window].DataContext.TypeCommand}"
+                                CommandParameter="{Binding}">
+                            <Grid>
+                                <TextBlock Classes="arm"
+                                           Text="{Binding Lower}"
+                                           IsVisible="{Binding !$parent[Window].DataContext.IsShiftLocked}"/>
+                                <TextBlock Classes="arm"
+                                           Text="{Binding Upper}"
+                                           IsVisible="{Binding $parent[Window].DataContext.IsShiftLocked}"/>
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Letter rows -->
+            <ItemsControl ItemsSource="{Binding Rows}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ItemsControl ItemsSource="{Binding}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="m:KeyModel">
+                                    <Button Classes="key"
+                                            Command="{Binding $parent[Window].DataContext.TypeCommand}"
+                                            CommandParameter="{Binding}">
+                                        <Grid>
+                                            <TextBlock Classes="qwerty" Text="{Binding Qwerty}"
+                                                       HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                       Margin="4,3,0,0"/>
+                                            <TextBlock Classes="hint" Text="{Binding Latin}"
+                                                       HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                       Margin="0,3,4,0"/>
+                                            <TextBlock Classes="arm"
+                                                       Text="{Binding Lower}"
+                                                       IsVisible="{Binding !$parent[Window].DataContext.IsShiftLocked}"/>
+                                            <TextBlock Classes="arm"
+                                                       Text="{Binding Upper}"
+                                                       IsVisible="{Binding $parent[Window].DataContext.IsShiftLocked}"/>
+                                            <TextBlock Classes="hint" Text="{Binding Russian}"
+                                                       HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                       Margin="0,0,4,3"/>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Punctuation row -->
+            <ItemsControl ItemsSource="{Binding PunctuationRow}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="m:KeyModel">
+                        <Button Classes="key"
+                                Command="{Binding $parent[Window].DataContext.TypeCommand}"
+                                CommandParameter="{Binding}">
+                            <Grid>
+                                <TextBlock Classes="hint" Text="{Binding Latin}"
+                                           HorizontalAlignment="Right" VerticalAlignment="Top"
+                                           Margin="0,3,4,0"/>
+                                <TextBlock Classes="arm" Text="{Binding Lower}" FontSize="22"/>
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Bottom row: shift, space, backspace, shift -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <ToggleButton Classes="tgl" IsChecked="{Binding IsShiftLocked}">
+                    <TextBlock Text="⇧" FontSize="20"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </ToggleButton>
+                <Button Classes="key" Width="260" FontSize="13"
+                        Command="{Binding TypeTextCommand}" CommandParameter=" ">
+                    <TextBlock Text="Բացատ"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Button>
+                <Button Classes="key" FontSize="18"
+                        Command="{Binding BackspaceCommand}">
+                    <TextBlock Text="⌫"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Button>
+                <ToggleButton Classes="tgl" IsChecked="{Binding IsShiftLocked}">
+                    <TextBlock Text="⇧" FontSize="20"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </ToggleButton>
+            </StackPanel>
+
+        </StackPanel>
+    </Grid>
+</Window>
