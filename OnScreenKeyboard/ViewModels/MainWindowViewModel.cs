@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OnScreenKeyboard.Input;
@@ -11,6 +12,7 @@ namespace OnScreenKeyboard.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly IKeystrokeSender _sender;
+    private readonly DispatcherTimer? _modifierTimer;
 
     public MainWindowViewModel()
         : this(OperatingSystem.IsWindows()
@@ -22,10 +24,36 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(IKeystrokeSender sender)
     {
         _sender = sender;
+
+        if (OperatingSystem.IsWindows())
+        {
+            // Poll Shift / CapsLock globally — the keyboard window never takes
+            // focus, so we can't rely on KeyDown/KeyUp events. 50ms is snappy
+            // enough to feel instant and cheap enough to ignore.
+            _modifierTimer = new DispatcherTimer(
+                TimeSpan.FromMilliseconds(50),
+                DispatcherPriority.Background,
+                (_, _) => PollModifiers());
+            _modifierTimer.Start();
+        }
     }
 
-    [ObservableProperty] private bool _isShiftLocked;
-    [ObservableProperty] private bool _isNumberRowVisible;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUpper))]
+    private bool _isShiftLocked;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUpper))]
+    private bool _isPhysicalShift;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUpper))]
+    private bool _isCapsLock;
+
+    [ObservableProperty]
+    private bool _isNumberRowVisible;
+
+    public bool IsUpper => IsShiftLocked || IsPhysicalShift || IsCapsLock;
 
     // Plain digits — toggleable row above everything.
     public IReadOnlyList<KeyModel> NumberRow { get; } = new[]
@@ -123,7 +151,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void Type(KeyModel? key)
     {
         if (key is null) return;
-        _sender.SendText(EffectiveShift() ? key.Upper : key.Lower);
+        _sender.SendText(IsUpper ? key.Upper : key.Lower);
     }
 
     [RelayCommand]
@@ -142,10 +170,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void Backspace() => _sender.SendBackspace();
 
-    private bool EffectiveShift()
+    private void PollModifiers()
     {
-        if (IsShiftLocked) return true;
-        if (!OperatingSystem.IsWindows()) return false;
-        return (Win32.GetAsyncKeyState(Win32.VK_SHIFT) & 0x8000) != 0;
+        bool shift = (Win32.GetAsyncKeyState(Win32.VK_SHIFT) & 0x8000) != 0;
+        bool caps  = (Win32.GetKeyState(Win32.VK_CAPITAL)  & 0x0001) != 0;
+        if (shift != IsPhysicalShift) IsPhysicalShift = shift;
+        if (caps  != IsCapsLock)      IsCapsLock      = caps;
     }
 }

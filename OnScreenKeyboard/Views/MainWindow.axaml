@@ -9,12 +9,12 @@
         x:DataType="vm:MainWindowViewModel"
         x:CompileBindings="False"
         Title="Armenian Keyboard"
-        Width="800"
-        SizeToContent="Height"
+        Width="800" Height="360"
+        MinWidth="320" MinHeight="160"
         Topmost="True"
         ShowActivated="False"
         ShowInTaskbar="False"
-        CanResize="False"
+        CanResize="True"
         WindowDecorations="BorderOnly"
         Background="#1E1E1E">
 
@@ -77,9 +77,11 @@
             </DockPanel>
         </Border>
 
-        <StackPanel Grid.Row="1" Orientation="Vertical"
+        <Viewbox Grid.Row="1" Stretch="Uniform" StretchDirection="Both"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Margin="0,4,0,4">
+        <StackPanel Orientation="Vertical"
                     HorizontalAlignment="Center"
-                    Margin="0,4,0,4"
                     Spacing="0">
 
             <!-- Number row (toggleable) -->
@@ -98,10 +100,10 @@
                             <Grid>
                                 <TextBlock Classes="arm"
                                            Text="{Binding Lower}"
-                                           IsVisible="{Binding !$parent[Window].DataContext.IsShiftLocked}"/>
+                                           IsVisible="{Binding !$parent[Window].DataContext.IsUpper}"/>
                                 <TextBlock Classes="arm"
                                            Text="{Binding Upper}"
-                                           IsVisible="{Binding $parent[Window].DataContext.IsShiftLocked}"/>
+                                           IsVisible="{Binding $parent[Window].DataContext.IsUpper}"/>
                             </Grid>
                         </Button>
                     </DataTemplate>
@@ -137,10 +139,10 @@
                                                        Margin="0,3,4,0"/>
                                             <TextBlock Classes="arm"
                                                        Text="{Binding Lower}"
-                                                       IsVisible="{Binding !$parent[Window].DataContext.IsShiftLocked}"/>
+                                                       IsVisible="{Binding !$parent[Window].DataContext.IsUpper}"/>
                                             <TextBlock Classes="arm"
                                                        Text="{Binding Upper}"
-                                                       IsVisible="{Binding $parent[Window].DataContext.IsShiftLocked}"/>
+                                                       IsVisible="{Binding $parent[Window].DataContext.IsUpper}"/>
                                             <TextBlock Classes="hint" Text="{Binding Russian}"
                                                        HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                                        Margin="0,0,4,3"/>
@@ -199,5 +201,6 @@
             </StackPanel>
 
         </StackPanel>
+        </Viewbox>
     </Grid>
 </Window>

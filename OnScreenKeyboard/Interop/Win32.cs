@@ -54,13 +54,17 @@ internal static class Win32
         public INPUTUNION U;
     }
 
-    public const int VK_SHIFT = 0x10;
+    public const int VK_SHIFT   = 0x10;
+    public const int VK_CAPITAL = 0x14;
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern uint SendInput(uint nInputs, [In] INPUT[] pInputs, int cbSize);
 
     [DllImport("user32.dll")]
     public static extern short GetAsyncKeyState(int vKey);
+
+    [DllImport("user32.dll")]
+    public static extern short GetKeyState(int nVirtKey);
 
     [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
     public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
