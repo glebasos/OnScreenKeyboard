@@ -5,6 +5,8 @@
         <Nullable>enable</Nullable>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+        <DebugSymbols Condition="'$(Configuration)' == 'Release'">false</DebugSymbols>
 
         <!-- Product metadata (shown in Explorer properties / crash dumps / etc.) -->
         <AssemblyName>OnScreenKeyboard</AssemblyName>
@@ -20,12 +22,13 @@
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
 
-    <!-- Don't ship symbol files (native deps + AOT-emitted app .pdb). -->
-    <Target Name="StripPdbsFromPublish" AfterTargets="Publish">
+    <!-- Belt-and-braces cleanup in case anything still drops a .pdb in publish. -->
+    <Target Name="RemoveNativePdbs" AfterTargets="Publish"
+            Condition="'$(Configuration)' == 'Release'">
         <ItemGroup>
-            <_PublishPdbs Include="$(PublishDir)*.pdb"/>
+            <_NativePdbs Include="$(PublishDir)**\*.pdb"/>
         </ItemGroup>
-        <Delete Files="@(_PublishPdbs)"/>
+        <Delete Files="@(_NativePdbs)"/>
     </Target>
 
     <!--
@@ -46,7 +49,6 @@
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
         <PublishAot>true</PublishAot>
         <IlcOptimizationPreference>Size</IlcOptimizationPreference>
-        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
