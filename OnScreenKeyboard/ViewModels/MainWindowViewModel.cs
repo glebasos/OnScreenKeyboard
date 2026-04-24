@@ -15,10 +15,16 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly DispatcherTimer? _modifierTimer;
 
     public MainWindowViewModel()
-        : this(OperatingSystem.IsWindows()
-            ? new WindowsUnicodeSender()
-            : throw new PlatformNotSupportedException("v1 is Windows only."))
+        : this(CreateSenderForCurrentOs())
     {
+    }
+
+    private static IKeystrokeSender CreateSenderForCurrentOs()
+    {
+        if (OperatingSystem.IsWindows()) return new WindowsUnicodeSender();
+        if (OperatingSystem.IsLinux())   return new LinuxXdotoolSender();
+        throw new PlatformNotSupportedException(
+            "Only Windows and Linux (X11 via xdotool) are supported. macOS is not yet implemented.");
     }
 
     public MainWindowViewModel(IKeystrokeSender sender)
