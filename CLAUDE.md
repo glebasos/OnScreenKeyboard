@@ -19,20 +19,22 @@ Target: `net10.0`, `WinExe`.
 
 ## Publish (Windows release)
 
-Release is **self-contained single-file + trimmed + ReadyToRun**. One `.exe` with the .NET runtime bundled in, ~25–40 MB. End users double-click it; nothing to install.
+Release uses **Native AOT**. Produces a true native `.exe` plus Avalonia's native dependencies next to it — no managed bundle, no `%TEMP%` extraction, fastest startup. Ship the whole `publish/` folder (zip it).
+
+One-time build-machine setup: install **Visual Studio Build Tools 2022** with the "Desktop development with C++" workload (required by the AOT native linker).
 
 ```
 cd OnScreenKeyboard
 dotnet publish -c Release -r win-x64
 ```
 
-Output: `bin/Release/net10.0/win-x64/publish/OnScreenKeyboard.exe` — ship this single file.
+Output: `bin/Release/net10.0/win-x64/publish/` — `OnScreenKeyboard.exe` plus ~5–7 native DLLs (SkiaSharp, HarfBuzz, ANGLE). First publish is 3–10 min; incrementals are faster.
 
-Trimming constraints when editing:
+AOT constraints when editing:
 - Compiled bindings are required (`AvaloniaUseCompiledBindingsByDefault=true`, no `x:CompileBindings="False"` overrides). `MainWindow.axaml` uses `#Root.((vm:MainWindowViewModel)DataContext).X` to reach VM members from inside DataTemplates.
-- Avoid `Type.GetType(string)` / `Activator.CreateInstance(Type)` / general reflection — it won't survive trimming. If you must, wrap it in `[DynamicDependency]` annotations.
-- MVVM Toolkit source generators (`[ObservableProperty]`, `[RelayCommand]`) are trim-safe.
-- Native libs (SkiaSharp, ANGLE) self-extract to `%TEMP%\.net\OnScreenKeyboard\<hash>\` on first run. Override with `DOTNET_BUNDLE_EXTRACT_BASE_DIR` env var if needed.
+- Avoid `Type.GetType(string)` / `Activator.CreateInstance(Type)` / general reflection — it won't survive trimming. The stock `ViewLocator` was removed for this reason.
+- MVVM Toolkit source generators (`[ObservableProperty]`, `[RelayCommand]`) are AOT-safe.
+- Don't set `InvariantGlobalization=true` — Armenian `ToUpper` needs ICU data.
 
 ## Stack
 

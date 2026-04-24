@@ -20,38 +20,32 @@
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
 
-    <!-- Don't ship native symbol files (SkiaSharp/HarfBuzz .pdb, ~100 MB total). -->
-    <Target Name="StripNativePdbsFromPublish" AfterTargets="Publish">
+    <!-- Don't ship symbol files (native deps + AOT-emitted app .pdb). -->
+    <Target Name="StripPdbsFromPublish" AfterTargets="Publish">
         <ItemGroup>
-            <_PublishPdbs Include="$(PublishDir)*.pdb" Exclude="$(PublishDir)$(AssemblyName).pdb"/>
+            <_PublishPdbs Include="$(PublishDir)*.pdb"/>
         </ItemGroup>
         <Delete Files="@(_PublishPdbs)"/>
     </Target>
 
     <!--
-      Release = self-contained single-file + trimmed + ReadyToRun.
-      Bundles the .NET runtime, strips unused code, precompiles IL to
-      native for faster startup. End users don't need .NET installed.
-      Expected size: ~25–40 MB.
+      Release = Native AOT. Produces a truly native .exe plus the
+      Avalonia native dependencies (SkiaSharp, HarfBuzz, ANGLE) next to
+      it. No managed bundle, so no %TEMP% extraction — everything loads
+      from the publish folder directly. Fastest startup, smallest working
+      set. Ship the whole folder (zip it).
 
-      TrimMode=partial only trims assemblies that opt in (IsTrimmable),
-      which is the safe default for Avalonia apps — compiled bindings
-      and MVVM Toolkit source generators avoid reflection, so nothing
-      load-bearing gets trimmed away.
+      Requires Visual Studio Build Tools 2022 with the
+      "Desktop development with C++" workload (for the native linker).
 
       Publish:
         dotnet publish -c Release -r win-x64
       Output:
-        bin/Release/net10.0/win-x64/publish/OnScreenKeyboard.exe
+        bin/Release/net10.0/win-x64/publish/
     -->
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-        <SelfContained>true</SelfContained>
-        <PublishSingleFile>true</PublishSingleFile>
-        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-        <PublishTrimmed>true</PublishTrimmed>
-        <TrimMode>partial</TrimMode>
-        <PublishReadyToRun>true</PublishReadyToRun>
+        <PublishAot>true</PublishAot>
+        <IlcOptimizationPreference>Size</IlcOptimizationPreference>
         <DebugType>embedded</DebugType>
     </PropertyGroup>
 
