@@ -2,13 +2,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:OnScreenKeyboard.ViewModels"
         xmlns:m="using:OnScreenKeyboard.Models"
+        xmlns:l="using:OnScreenKeyboard.Layouts"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="660" d:DesignHeight="420"
         x:Class="OnScreenKeyboard.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         x:CompileBindings="False"
-        Title="Armenian Keyboard"
+        Title="{Binding WindowTitle}"
         Width="800" Height="360"
         MinWidth="320" MinHeight="160"
         Topmost="True"
@@ -73,8 +74,21 @@
                 <Button DockPanel.Dock="Right" Content="—" Width="46" Height="28"
                         Padding="0" Background="Transparent" Foreground="White"
                         Name="MinBtn"/>
-                <TextBlock Text="Armenian Keyboard" Foreground="#CCC"
-                           VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <TextBlock DockPanel.Dock="Left" Text="{Binding WindowTitle}"
+                           Foreground="#CCC"
+                           VerticalAlignment="Center" Margin="8,0,8,0"/>
+                <ComboBox DockPanel.Dock="Left"
+                          ItemsSource="{Binding AvailableLayouts}"
+                          SelectedItem="{Binding CurrentLayout, Mode=TwoWay}"
+                          VerticalAlignment="Center"
+                          Height="22" MinWidth="120" Padding="6,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="l:ILanguageLayout">
+                            <TextBlock Text="{Binding DisplayName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock/>
             </DockPanel>
         </Border>
 
@@ -135,7 +149,7 @@
                                             <TextBlock Classes="qwerty" Text="{Binding Qwerty}"
                                                        HorizontalAlignment="Left" VerticalAlignment="Top"
                                                        Margin="4,3,0,0"/>
-                                            <TextBlock Classes="hint" Text="{Binding Latin}"
+                                            <TextBlock Classes="hint" Text="{Binding HintTopRight}"
                                                        HorizontalAlignment="Right" VerticalAlignment="Top"
                                                        Margin="0,3,4,0"/>
                                             <TextBlock Classes="arm"
@@ -144,7 +158,7 @@
                                             <TextBlock Classes="arm"
                                                        Text="{Binding Upper}"
                                                        IsVisible="{Binding $parent[Window].DataContext.IsUpper}"/>
-                                            <TextBlock Classes="hint" Text="{Binding Russian}"
+                                            <TextBlock Classes="hint" Text="{Binding HintBottomRight}"
                                                        HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                                        Margin="0,0,4,3"/>
                                         </Grid>
@@ -169,7 +183,7 @@
                                 Command="{Binding $parent[Window].DataContext.TypeCommand}"
                                 CommandParameter="{Binding}">
                             <Grid>
-                                <TextBlock Classes="hint" Text="{Binding Latin}"
+                                <TextBlock Classes="hint" Text="{Binding HintTopRight}"
                                            HorizontalAlignment="Right" VerticalAlignment="Top"
                                            Margin="0,3,4,0"/>
                                 <TextBlock Classes="arm" Text="{Binding Lower}" FontSize="22"/>
@@ -191,7 +205,7 @@
                 </ToggleButton>
                 <Button Classes="key" Width="260" FontSize="13"
                         Command="{Binding TypeTextCommand}" CommandParameter=" ">
-                    <TextBlock Text="Բացատ"
+                    <TextBlock Text="{Binding SpaceLabel}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
                 <Button Classes="key" FontSize="18"

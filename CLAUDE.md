@@ -28,8 +28,18 @@ Target: `net10.0`, `WinExe`.
 - `Interop/Win32.cs` — P/Invoke: `SendInput`, `Get/SetWindowLongPtrW`, extended-style flags.
 - `Input/IKeystrokeSender.cs` — abstraction. `SendText(string)` / `SendBackspace()`.
 - `Input/WindowsUnicodeSender.cs` — builds `INPUT[]` with `KEYEVENTF_UNICODE`. `wScan` = UTF-16 code unit; BMP-only chars (Armenian U+0530–U+058F all fit). Surrogate pairs would naturally flow as two events.
-- `ViewModels/MainWindowViewModel.cs` — `TypeCommand(string)` + `BackspaceCommand`. Holds the key layout as a collection of `KeyModel` records.
-- `Views/MainWindow.axaml(.cs)` — topmost no-activate window; draggable custom title bar.
+- `Layouts/ILanguageLayout.cs` — per-language layout contract (display name, space label, letter rows, punctuation row).
+- `Layouts/ArmenianLayout.cs` — the built-in Armenian layout; serves as the example to copy when adding a language.
+- `ViewModels/MainWindowViewModel.cs` — `TypeCommand(string)` + `BackspaceCommand`; holds `AvailableLayouts` and the selected `CurrentLayout`. Register new layouts in `BuildLayouts()`.
+- `Views/MainWindow.axaml(.cs)` — topmost no-activate window; draggable custom title bar with a language-switcher dropdown.
+
+## Adding a language
+
+1. Create `Layouts/XxxLayout.cs` implementing `ILanguageLayout`. Copy `ArmenianLayout.cs` as a template.
+2. For letter keys use `KeyModel.Letter(qwerty, lower, hintTopRight, hintBottomRight, culture)` — pass the language's `CultureInfo` so `ToUpper` uses the right casing rules. Hints are free-form (Latin transliteration, another language's equivalent, pronunciation — whatever helps the user).
+3. For non-casing keys (digits, punctuation) use `KeyModel.Symbol(...)`.
+4. Add an instance to the array in `MainWindowViewModel.BuildLayouts()`. Order = dropdown order; first is default.
+5. The number row (0–9) is language-independent and lives in the VM — don't duplicate it in the layout.
 
 ## Avalonia 12 specifics / gotchas
 
