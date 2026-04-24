@@ -3,12 +3,13 @@
         xmlns:vm="using:OnScreenKeyboard.ViewModels"
         xmlns:m="using:OnScreenKeyboard.Models"
         xmlns:l="using:OnScreenKeyboard.Layouts"
+        xmlns:sys="using:System.Collections"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="660" d:DesignHeight="420"
         x:Class="OnScreenKeyboard.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        x:CompileBindings="False"
+        Name="Root"
         Title="{Binding WindowTitle}"
         Width="800" Height="360"
         MinWidth="320" MinHeight="160"
@@ -110,22 +111,22 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="m:KeyModel">
                         <Button Classes="key"
-                                Command="{Binding $parent[Window].DataContext.TypeCommand}"
+                                Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).TypeCommand}"
                                 CommandParameter="{Binding}">
                             <Grid>
                                 <TextBlock Classes="arm"
                                            Text="{Binding Lower}"
-                                           IsVisible="{Binding !$parent[Window].DataContext.IsUpper}"/>
+                                           IsVisible="{Binding !#Root.((vm:MainWindowViewModel)DataContext).IsUpper}"/>
                                 <TextBlock Classes="arm"
                                            Text="{Binding Upper}"
-                                           IsVisible="{Binding $parent[Window].DataContext.IsUpper}"/>
+                                           IsVisible="{Binding #Root.((vm:MainWindowViewModel)DataContext).IsUpper}"/>
                             </Grid>
                         </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <!-- Letter rows -->
+            <!-- Letter rows (outer items are IReadOnlyList<KeyModel>, bound as IEnumerable) -->
             <ItemsControl ItemsSource="{Binding Rows}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -133,7 +134,7 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate DataType="sys:IEnumerable">
                         <ItemsControl ItemsSource="{Binding}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -143,7 +144,7 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="m:KeyModel">
                                     <Button Classes="key"
-                                            Command="{Binding $parent[Window].DataContext.TypeCommand}"
+                                            Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).TypeCommand}"
                                             CommandParameter="{Binding}">
                                         <Grid>
                                             <TextBlock Classes="qwerty" Text="{Binding Qwerty}"
@@ -154,10 +155,10 @@
                                                        Margin="0,3,4,0"/>
                                             <TextBlock Classes="arm"
                                                        Text="{Binding Lower}"
-                                                       IsVisible="{Binding !$parent[Window].DataContext.IsUpper}"/>
+                                                       IsVisible="{Binding !#Root.((vm:MainWindowViewModel)DataContext).IsUpper}"/>
                                             <TextBlock Classes="arm"
                                                        Text="{Binding Upper}"
-                                                       IsVisible="{Binding $parent[Window].DataContext.IsUpper}"/>
+                                                       IsVisible="{Binding #Root.((vm:MainWindowViewModel)DataContext).IsUpper}"/>
                                             <TextBlock Classes="hint" Text="{Binding HintBottomRight}"
                                                        HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                                        Margin="0,0,4,3"/>
@@ -180,7 +181,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="m:KeyModel">
                         <Button Classes="key"
-                                Command="{Binding $parent[Window].DataContext.TypeCommand}"
+                                Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).TypeCommand}"
                                 CommandParameter="{Binding}">
                             <Grid>
                                 <TextBlock Classes="hint" Text="{Binding HintTopRight}"

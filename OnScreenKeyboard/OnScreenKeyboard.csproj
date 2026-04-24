@@ -1,16 +1,59 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+
+        <!-- Product metadata (shown in Explorer properties / crash dumps / etc.) -->
+        <AssemblyName>OnScreenKeyboard</AssemblyName>
+        <RootNamespace>OnScreenKeyboard</RootNamespace>
+        <Product>On-Screen Keyboard</Product>
+        <Description>Floating on-screen Armenian keyboard for Windows.</Description>
+        <Version>1.0.0</Version>
+        <FileVersion>1.0.0.0</FileVersion>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Models\"/>
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
+
+    <!-- Don't ship native symbol files (SkiaSharp/HarfBuzz .pdb, ~100 MB total). -->
+    <Target Name="StripNativePdbsFromPublish" AfterTargets="Publish">
+        <ItemGroup>
+            <_PublishPdbs Include="$(PublishDir)*.pdb" Exclude="$(PublishDir)$(AssemblyName).pdb"/>
+        </ItemGroup>
+        <Delete Files="@(_PublishPdbs)"/>
+    </Target>
+
+    <!--
+      Release = self-contained single-file + trimmed + ReadyToRun.
+      Bundles the .NET runtime, strips unused code, precompiles IL to
+      native for faster startup. End users don't need .NET installed.
+      Expected size: ~25–40 MB.
+
+      TrimMode=partial only trims assemblies that opt in (IsTrimmable),
+      which is the safe default for Avalonia apps — compiled bindings
+      and MVVM Toolkit source generators avoid reflection, so nothing
+      load-bearing gets trimmed away.
+
+      Publish:
+        dotnet publish -c Release -r win-x64
+      Output:
+        bin/Release/net10.0/win-x64/publish/OnScreenKeyboard.exe
+    -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <SelfContained>true</SelfContained>
+        <PublishSingleFile>true</PublishSingleFile>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+        <PublishTrimmed>true</PublishTrimmed>
+        <TrimMode>partial</TrimMode>
+        <PublishReadyToRun>true</PublishReadyToRun>
+        <DebugType>embedded</DebugType>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="12.0.0"/>
